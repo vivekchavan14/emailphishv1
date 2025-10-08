@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: phishing-detection-api
+    runtime: python3
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    plan: free
+    healthCheckPath: /api/v2/health
+    env:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+    envVars:
+      - key: API_ENV
+        value: production
+      - key: ENABLE_CORS
+        value: true
+      - key: LOG_LEVEL
+        value: info
