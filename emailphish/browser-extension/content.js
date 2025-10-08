@@ -263,8 +263,11 @@ class PhishMailGuard {
 
   showBasicNotification(result) {
     const isPhishing = result.prediction === 'Phishing Email';
-    const confidence = result.phishing_confidence || result.confidence || 0;
-    const phishingPercentage = isPhishing ? (confidence * 100) : ((1 - confidence) * 100);
+    const phishingConfidence = result.phishing_confidence || result.confidence || 0;
+    const phishingPercentage = isPhishing ? (phishingConfidence * 100) : (phishingConfidence * 100);
+    
+    // Determine if unsafe (50% threshold)
+    const isUnsafe = phishingPercentage >= 50;
     
     // Create notification
     const notification = document.createElement('div');
@@ -273,8 +276,8 @@ class PhishMailGuard {
       top: 20px;
       right: 20px;
       z-index: 9999999;
-      background: ${isPhishing ? '#fef2f2' : '#f0fdf4'};
-      border: 2px solid ${isPhishing ? '#dc2626' : '#059669'};
+      background: ${isUnsafe ? '#fef2f2' : '#f0fdf4'};
+      border: 2px solid ${isUnsafe ? '#dc2626' : '#059669'};
       border-radius: 12px;
       padding: 16px;
       max-width: 350px;
@@ -282,15 +285,29 @@ class PhishMailGuard {
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     `;
     
+    // User-friendly reason
+    let friendlyReason = 'Analysis complete';
+    if (result.reasons && result.reasons[0]) {
+      const reason = result.reasons[0];
+      // Convert technical reasons to user-friendly ones
+      if (reason.toLowerCase().includes('suspicious') || reason.toLowerCase().includes('phishing')) {
+        friendlyReason = 'This email contains suspicious patterns';
+      } else if (reason.toLowerCase().includes('legitimate') || reason.toLowerCase().includes('professional')) {
+        friendlyReason = 'This email appears legitimate and safe';
+      } else {
+        friendlyReason = reason;
+      }
+    }
+    
     notification.innerHTML = `
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-        <div style="font-size: 24px;">${isPhishing ? '⚠️' : '✅'}</div>
+        <div style="font-size: 24px;">${isUnsafe ? '🛡️' : '✅'}</div>
         <div>
-          <div style="font-weight: bold; color: ${isPhishing ? '#dc2626' : '#059669'};">
-            ${isPhishing ? 'Phishing Email Detected' : 'Email is Safe'}
+          <div style="font-weight: bold; color: ${isUnsafe ? '#dc2626' : '#059669'};">
+            ${isUnsafe ? 'Unsafe Email' : 'Safe Email'}
           </div>
           <div style="font-size: 13px; color: #666;">
-            ${phishingPercentage.toFixed(1)}% Phishing Risk
+            ${isUnsafe ? 'Be careful with this email' : 'This email appears legitimate'}
           </div>
         </div>
         <button onclick="this.parentElement.parentElement.remove()" 
@@ -299,7 +316,7 @@ class PhishMailGuard {
         </button>
       </div>
       <div style="font-size: 13px; color: #555;">
-        ${result.reasons && result.reasons[0] ? result.reasons[0] : 'Analysis complete'}
+        ${friendlyReason}
       </div>
     `;
     
@@ -308,7 +325,7 @@ class PhishMailGuard {
     // Auto-remove
     setTimeout(() => {
       if (notification.parentNode) notification.remove();
-    }, isPhishing ? 8000 : 4000);
+    }, isUnsafe ? 8000 : 4000);
   }
 
   showErrorNotification(message) {

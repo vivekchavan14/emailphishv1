@@ -4,38 +4,16 @@ console.log('🎯 Loading Fixed Popup System with Working Dropdown...');
 class FixedPhishingAlert {
     constructor() {
         this.alertTypes = {
-            HIGH_DANGER: {
-                threshold: 80,
-                class: 'high-danger',
+            UNSAFE: {
+                threshold: 50, // 50% threshold - anything above is considered unsafe
+                class: 'unsafe-email',
                 color: '#dc2626',
                 bgColor: 'linear-gradient(135deg, #fef2f2, #fee2e2)',
                 borderColor: '#dc2626',
-                icon: '🚨',
-                title: 'PHISHING – HIGH DANGER',
-                subtitle: 'Immediate Action Required',
-                autoCloseDelay: 12000
-            },
-            WARNING: {
-                threshold: 60,
-                class: 'warning-phishing',
-                color: '#f59e0b',
-                bgColor: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                borderColor: '#f59e0b',
-                icon: '⚠️',
-                title: 'POSSIBLE PHISHING – BE AWARE',
-                subtitle: 'Exercise Extreme Caution',
+                icon: '🛡️',
+                title: 'UNSAFE EMAIL DETECTED',
+                subtitle: 'This email appears to be suspicious',
                 autoCloseDelay: 10000
-            },
-            CAUTION: {
-                threshold: 5,
-                class: 'caution-flags',
-                color: '#f97316',
-                bgColor: 'linear-gradient(135deg, #fff7ed, #fed7aa)',
-                borderColor: '#f97316',
-                icon: '🟡',
-                title: 'FEW RED FLAGS – BE AWARE',
-                subtitle: 'Minor Suspicious Elements',
-                autoCloseDelay: 8000
             },
             SAFE: {
                 threshold: 0,
@@ -44,9 +22,9 @@ class FixedPhishingAlert {
                 bgColor: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
                 borderColor: '#059669',
                 icon: '✅',
-                title: 'SAFE – VERY LOW RISK',
-                subtitle: 'Email Appears Legitimate',
-                autoCloseDelay: 6000
+                title: 'SAFE EMAIL',
+                subtitle: 'This email appears legitimate',
+                autoCloseDelay: 5000
             }
         };
         
@@ -76,19 +54,9 @@ class FixedPhishingAlert {
                 border: 1px solid rgba(0, 0, 0, 0.06);
             }
 
-            .fixed-phishing-alert.high-danger {
+            .fixed-phishing-alert.unsafe-email {
                 border-left: 5px solid #dc2626;
                 box-shadow: 0 20px 40px rgba(220, 38, 38, 0.25), 0 8px 16px rgba(220, 38, 38, 0.15);
-            }
-
-            .fixed-phishing-alert.warning-phishing {
-                border-left: 5px solid #f59e0b;
-                box-shadow: 0 20px 40px rgba(245, 158, 11, 0.25), 0 8px 16px rgba(245, 158, 11, 0.15);
-            }
-
-            .fixed-phishing-alert.caution-flags {
-                border-left: 5px solid #f97316;
-                box-shadow: 0 20px 40px rgba(249, 115, 22, 0.2), 0 8px 16px rgba(249, 115, 22, 0.1);
             }
 
             .fixed-phishing-alert.safe-email {
@@ -407,73 +375,92 @@ class FixedPhishingAlert {
 
     getAlertType(phishingPercentage) {
         console.log('🎯 PhishMail Guard: Checking alert type for', phishingPercentage + '% phishing risk');
-        if (phishingPercentage >= 80) {
-            console.log('🔴 Alert Type: HIGH_DANGER (>=80%)');
-            return this.alertTypes.HIGH_DANGER;
+        if (phishingPercentage >= 50) {
+            console.log('🔴 Alert Type: UNSAFE (>=50%)');
+            return this.alertTypes.UNSAFE;
         }
-        if (phishingPercentage >= 60) {
-            console.log('🟠 Alert Type: WARNING (>=60%)');
-            return this.alertTypes.WARNING;
-        }
-        if (phishingPercentage > 15) {
-            console.log('🟡 Alert Type: CAUTION (>15%)');
-            return this.alertTypes.CAUTION;
-        }
-        console.log('🟢 Alert Type: SAFE (<=15%)');
+        console.log('🟢 Alert Type: SAFE (<50%)');
         return this.alertTypes.SAFE;
     }
 
     generateReasons(result, phishingPercentage) {
         const reasons = [];
         
-        // Add reasons from API if available
+        // Add user-friendly reasons from API if available, otherwise use our own
         if (result.reasons && result.reasons.length > 0) {
-            result.reasons.forEach(reason => reasons.push(reason));
+            // Transform technical reasons into user-friendly ones
+            result.reasons.forEach(reason => {
+                reasons.push(this.makeReasonUserFriendly(reason));
+            });
         }
         
-        // Add context-appropriate reasons
-        if (phishingPercentage >= 80) {
-            reasons.push(...[
-                'Multiple high-risk phishing indicators detected',
-                'Suspicious URL patterns and domain characteristics',
-                'Urgent action language commonly used in scams',
-                'Request for sensitive personal information',
-                'Threat of account suspension or closure'
-            ]);
-        } else if (phishingPercentage >= 60) {
-            reasons.push(...[
-                'Several warning signs present in email content',
-                'Potentially suspicious sender domain',
-                'Moderate risk language patterns detected',
-                'Some characteristics match known phishing attempts'
-            ]);
-        } else if (phishingPercentage >= 5) {
-            reasons.push(...[
-                'Minor suspicious elements identified',
-                'Some characteristics require attention',
-                'Generally safe but exercise normal caution'
-            ]);
+        // Add context-appropriate user-friendly reasons
+        if (phishingPercentage >= 50) {
+            // UNSAFE email reasons - clear and actionable
+            const unsafeReasons = [
+                'This email contains suspicious language patterns',
+                'The sender may not be who they claim to be',
+                'Links or requests in this email could be dangerous',
+                'This email uses tactics common in scam attempts',
+                'We recommend not clicking any links in this email',
+                'Be very careful before sharing any personal information'
+            ];
+            // Add some of these if we don't have enough specific reasons
+            while (reasons.length < 4 && unsafeReasons.length > 0) {
+                reasons.push(unsafeReasons.shift());
+            }
         } else {
-            reasons.push(...[
-                'Email passes comprehensive security analysis',
-                'Legitimate sender domain verified',
-                'Professional email format and structure',
-                'No suspicious links or attachments detected'
-            ]);
+            // SAFE email reasons - reassuring but still educational
+            const safeReasons = [
+                'This email appears to be from a legitimate source',
+                'No suspicious patterns or dangerous links detected',
+                'The email format and language appear professional',
+                'Security analysis found no major red flags',
+                'This email is likely safe to read and respond to',
+                'Continue using normal email safety practices'
+            ];
+            // Add some of these if we don't have enough specific reasons
+            while (reasons.length < 3 && safeReasons.length > 0) {
+                reasons.push(safeReasons.shift());
+            }
         }
         
-        return reasons.slice(0, 6); // Limit to 6 reasons for smaller popup
+        return reasons.slice(0, 4); // Limit to 4 clear, actionable reasons
+    }
+    
+    makeReasonUserFriendly(technicalReason) {
+        // Convert technical reasons to user-friendly language
+        const friendlyMappings = {
+            'ML model detected phishing patterns': 'Our security system detected suspicious patterns',
+            'Contains urgent action indicators': 'This email uses urgent language to pressure you',
+            'Contains credential theft patterns': 'This email may be trying to steal your passwords',
+            'Contains threat language patterns': 'This email uses threatening language',
+            'Contains financial scam patterns': 'This email may be a financial scam',
+            'Contains fake security patterns': 'This email may be faking security alerts',
+            'Excessive use of exclamation marks': 'This email uses too many exclamation marks (common in scams)',
+            'Excessive use of capital letters': 'This email uses excessive CAPITAL LETTERS',
+            'Contains suspicious URLs': 'This email contains suspicious links',
+            'References known legitimate services': 'This email mentions legitimate companies you may trust',
+            'Uses professional language patterns': 'This email uses professional, business-like language',
+            'Contains legitimate business terms': 'This email uses normal business terminology'
+        };
+        
+        // Check for partial matches and return friendly version
+        for (const [technical, friendly] of Object.entries(friendlyMappings)) {
+            if (technicalReason.toLowerCase().includes(technical.toLowerCase())) {
+                return friendly;
+            }
+        }
+        
+        // If no mapping found, return the original but make it more user-friendly
+        return technicalReason.charAt(0).toUpperCase() + technicalReason.slice(1).toLowerCase();
     }
 
     getRiskAssessmentText(phishingPercentage) {
-        if (phishingPercentage >= 80) {
-            return 'IMMEDIATE DANGER: This email shows extremely high phishing indicators. Do NOT click any links, download attachments, or provide personal information.';
-        } else if (phishingPercentage >= 60) {
-            return 'HIGH CAUTION: This email contains several suspicious elements. Verify sender authenticity before taking any action.';
-        } else if (phishingPercentage > 15) {
-            return 'STAY ALERT: Some elements require attention. Double-check sender identity and be cautious with links.';
+        if (phishingPercentage >= 50) {
+            return 'UNSAFE EMAIL: This email appears to be suspicious and may be a phishing attempt. We recommend not clicking any links, downloading attachments, or sharing personal information. If you think this email should be legitimate, verify directly with the sender through a different method.';
         } else {
-            return 'LOW RISK: This email appears legitimate and safe. Continue to exercise general email safety practices.';
+            return 'SAFE EMAIL: This email appears to be legitimate and poses low risk. While it\'s likely safe to interact with, always use good email security practices like verifying unexpected requests and being cautious with personal information.';
         }
     }
 
@@ -614,36 +601,14 @@ class FixedPhishingAlert {
         return alertElement;
     }
 
-    // Test functions
-    testHighDanger() {
+    // Test functions for the simplified system
+    testUnsafe() {
         const testResult = {
             prediction: 'Phishing Email',
-            confidence: 0.92,
-            phishing_confidence: 0.92,
-            safe_confidence: 0.08,
-            reasons: ['Suspicious domain detected', 'Urgent action language', 'Account threat mentioned']
-        };
-        return this.showFixedAlert(testResult);
-    }
-
-    testWarning() {
-        const testResult = {
-            prediction: 'Phishing Email',
-            confidence: 0.71,
-            phishing_confidence: 0.71,
-            safe_confidence: 0.29,
-            reasons: ['Some suspicious elements detected', 'Caution advised']
-        };
-        return this.showFixedAlert(testResult);
-    }
-
-    testCaution() {
-        const testResult = {
-            prediction: 'Safe Email',
-            confidence: 0.82,
-            phishing_confidence: 0.18,
-            safe_confidence: 0.82,
-            reasons: ['Minor inconsistencies noted']
+            confidence: 0.85,
+            phishing_confidence: 0.85,
+            safe_confidence: 0.15,
+            reasons: ['This email uses urgent language to pressure you', 'The sender may not be who they claim to be', 'Links or requests in this email could be dangerous']
         };
         return this.showFixedAlert(testResult);
     }
@@ -651,10 +616,10 @@ class FixedPhishingAlert {
     testSafe() {
         const testResult = {
             prediction: 'Safe Email',
-            confidence: 0.97,
-            phishing_confidence: 0.03,
-            safe_confidence: 0.97,
-            reasons: ['Legitimate sender verified', 'Professional format']
+            confidence: 0.92,
+            phishing_confidence: 0.08,
+            safe_confidence: 0.92,
+            reasons: ['This email appears to be from a legitimate source', 'No suspicious patterns or dangerous links detected', 'The email format and language appear professional']
         };
         return this.showFixedAlert(testResult);
     }
@@ -664,9 +629,7 @@ class FixedPhishingAlert {
 window.FixedPhishingAlert = FixedPhishingAlert;
 window.fixedPhishingAlert = new FixedPhishingAlert();
 
-console.log('✅ Fixed Popup System with Working Dropdown loaded successfully!');
+console.log('✅ Simplified Popup System (Safe/Unsafe) loaded successfully!');
 console.log('📋 Test functions available:');
-console.log('  - fixedPhishingAlert.testHighDanger()');
-console.log('  - fixedPhishingAlert.testWarning()');
-console.log('  - fixedPhishingAlert.testCaution()');
-console.log('  - fixedPhishingAlert.testSafe()');
+console.log('  - fixedPhishingAlert.testUnsafe() // Red popup for unsafe emails');
+console.log('  - fixedPhishingAlert.testSafe()   // Green popup for safe emails');
