@@ -181,6 +181,12 @@ Thumbs.db
 *.csv
 !requirements.csv
 !sample_data.csv
+*.tar.bz2
+*.zip
+*.txt
+datasets/
+!README.txt
+!requirements.txt
 
 # Trained models directory
 trained_models/
