@@ -48,8 +48,8 @@ email-phish-project/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/production-phishing-detection.git
-cd production-phishing-detection
+git clone https://github.com/vivekchavan14/emailphishv1.git
+cd emailphishv1
 ```
 
 ### 2. Install Dependencies
@@ -330,8 +330,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/production-phishing-detection/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/production-phishing-detection/discussions)
+- **Issues**: [GitHub Issues](https://github.com/vivekchavan14/emailphishv1/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/vivekchavan14/emailphishv1/discussions)
 - **Email**: vivekchavan14@example.com
 
 ## 🔮 Roadmap
