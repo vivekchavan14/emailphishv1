@@ -1,6 +1,6 @@
 // Background service worker for PhishMail Guard
-const API_URL = 'https://emailphishv1-2.onrender.com/predict';
-const API_SENDER_CHECK_URL = 'https://emailphishv1-2.onrender.com/check_sender';
+const API_URL = 'http://localhost:10000/predict';
+const API_SENDER_CHECK_URL = 'http://localhost:10000/check_sender';
 
 // Cache for recent predictions to avoid duplicate API calls
 const predictionCache = new Map();

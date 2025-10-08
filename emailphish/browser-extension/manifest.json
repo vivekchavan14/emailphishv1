@@ -19,6 +19,8 @@
     "http://localhost:8000/*",
     "http://localhost:8001/*",
     "http://localhost:8002/*",
+    "http://localhost:8005/*",
+    "http://localhost:10000/*",
     "https://mailphishing-detection-1.onrender.com/*",
     "https://emailphishv1-2.onrender.com/*"
   ],
