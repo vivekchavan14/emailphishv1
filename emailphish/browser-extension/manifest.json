@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "PhishMail Guard Enhanced",
+  "version": "2.0.1",
+  "description": "Enhanced real-time phishing email detection with reduced false positives",
+  
+  "permissions": [
+    "activeTab",
+    "storage",
+    "notifications",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "*://mail.google.com/*",
+    "*://outlook.live.com/*",
+    "*://outlook.office.com/*",
+    "*://mail.yahoo.com/*",
+    "http://localhost:8000/*",
+    "http://localhost:8001/*",
+    "http://localhost:8002/*",
+    "https://mailphishing-detection-1.onrender.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "*://mail.google.com/*",
+        "*://outlook.live.com/*",
+        "*://outlook.office.com/*",
+        "*://mail.yahoo.com/*"
+      ],
+      "js": ["fixed-popup-system.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup-new.html",
+    "default_title": "PhishMail Guard",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png", 
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

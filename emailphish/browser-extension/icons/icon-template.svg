@@ -1,0 +1,14 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="64" cy="64" r="60" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  
+  <!-- Shield Shape -->
+  <path d="M64 20 L45 30 L45 55 Q45 75 64 95 Q83 75 83 55 L83 30 Z" fill="white" opacity="0.9"/>
+  
+  <!-- Checkmark -->
+  <path d="M54 58 L60 64 L74 48" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Email Symbol -->
+  <rect x="50" y="70" width="28" height="18" rx="2" fill="#1d4ed8" opacity="0.8"/>
+  <path d="M50 72 L64 80 L78 72" stroke="white" stroke-width="1.5" fill="none"/>
+</svg>

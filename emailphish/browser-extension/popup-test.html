@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishMail Guard - Test Scrollable Popup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 360px;
+            max-height: 600px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .popup-container {
+            padding: 16px;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .logo svg {
+            color: #3b82f6;
+        }
+
+        h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .tab-status {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .scan-status {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .latest-analysis {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .analysis-header {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+        }
+
+        .confidence-display {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .confidence-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ef4444;
+            position: relative;
+        }
+
+        .confidence-circle.danger {
+            border-color: #ef4444;
+        }
+
+        .confidence-percentage {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .confidence-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            color: #ef4444;
+        }
+
+        .analysis-reasons {
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .reasons-header {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #6b7280;
+        }
+
+        .reasons-list {
+            list-style: none;
+        }
+
+        .reasons-list li {
+            font-size: 12px;
+            padding: 4px 0;
+            color: #374151;
+            position: relative;
+            padding-left: 16px;
+            line-height: 1.4;
+        }
+
+        .reasons-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #6b7280;
+        }
+
+        .quick-settings {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .setting-toggle {
+            margin-bottom: 8px;
+        }
+
+        .setting-toggle:last-child {
+            margin-bottom: 0;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toggle-container input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 32px;
+            height: 18px;
+            background: #d1d5db;
+            border-radius: 9px;
+            margin-right: 8px;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .toggle-slider:after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.2s;
+        }
+
+        .toggle-container input:checked + .toggle-slider {
+            background: #3b82f6;
+        }
+
+        .toggle-container input:checked + .toggle-slider:after {
+            left: 16px;
+        }
+
+        .scan-button {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .scan-button:hover {
+            background: #2563eb;
+        }
+
+        .scan-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Custom scrollbar styles */
+        body::-webkit-scrollbar, .analysis-reasons::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        body::-webkit-scrollbar-track, .analysis-reasons::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        body::-webkit-scrollbar-thumb, .analysis-reasons::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover, .analysis-reasons::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Ensure the popup doesn't overflow browser extension constraints */
+        @media screen and (max-height: 500px) {
+            body {
+                max-height: 400px;
+            }
+            .analysis-reasons {
+                max-height: 120px;
+            }
+        }
+
+        @media screen and (max-height: 400px) {
+            body {
+                max-height: 300px;
+            }
+            .popup-container {
+                padding: 12px;
+                gap: 12px;
+            }
+            .analysis-reasons {
+                max-height: 80px;
+            }
+        }
+
+        .demo-notice {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+            color: #1e40af;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="demo-notice">
+            🔧 SCROLLABLE DEMO - This popup now properly scrolls!
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <h1>PhishMail Guard</h1>
+        </div>
+
+        <!-- Current Tab Status -->
+        <div class="tab-status" id="tab-status">
+            <div class="provider-name" id="provider-name">Gmail (demo)</div>
+            <div class="scan-status" id="scan-status">Real-time protection active</div>
+        </div>
+
+        <!-- Latest Email Analysis -->
+        <div class="latest-analysis" id="latest-analysis">
+            <div class="analysis-header">Latest Email Analysis</div>
+            
+            <div class="confidence-display">
+                <div class="confidence-circle danger" id="confidence-circle">
+                    <div class="confidence-percentage" id="confidence-percentage">87%</div>
+                    <div class="confidence-label" id="confidence-label">PHISHING</div>
+                </div>
+            </div>
+            
+            <div class="analysis-reasons" id="analysis-reasons">
+                <div class="reasons-header">Classification Reasons (scroll to see all):</div>
+                <ul class="reasons-list" id="reasons-list">
+                    <li><strong>Suspicious URLs detected:</strong> Contains 2 suspicious URLs with suspicious TLDs (.tk, .ml)</li>
+                    <li><strong>Urgent threat language:</strong> Uses 3 urgent threat language patterns like "URGENT", "expires immediately", "account suspended"</li>
+                    <li><strong>Credential harvesting attempts:</strong> Shows 2 credential harvesting attempts requesting password verification</li>
+                    <li><strong>Financial scam indicators:</strong> Contains suspicious money-related terms and prize claims</li>
+                    <li><strong>Excessive capital letters:</strong> Over 30% of text uses capital letters (suspicious pattern)</li>
+                    <li><strong>Suspicious sender domain:</strong> Email originates from unverified domain with poor reputation</li>
+                    <li><strong>URL shorteners detected:</strong> Uses URL shortening services to hide actual destinations</li>
+                    <li><strong>Typosquatting detected:</strong> Domain name closely mimics legitimate service (paypaI instead of paypal)</li>
+                    <li><strong>Missing DKIM/SPF:</strong> Email fails authentication checks</li>
+                    <li><strong>Emotional manipulation:</strong> Uses fear-based language to trigger immediate action</li>
+                    <li><strong>Generic greetings:</strong> Uses non-personalized greetings typical of mass phishing</li>
+                    <li><strong>Grammar inconsistencies:</strong> Multiple grammatical errors suggesting automated generation</li>
+                    <li><strong>IP-based links:</strong> Contains links pointing directly to IP addresses instead of domains</li>
+                    <li><strong>Suspicious attachments:</strong> May contain executable or suspicious file attachments</li>
+                    <li><strong>Brand impersonation:</strong> Attempts to impersonate legitimate financial institution</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Quick Settings -->
+        <div class="quick-settings">
+            <div class="setting-toggle">
+                <label class="toggle-container">
+                    <input type="checkbox" id="extension-enabled" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Protection Enabled</span>
+                </label>
+            </div>
+            
+            <div class="setting-toggle">
+                <label class="toggle-container">
+                    <input type="checkbox" id="show-warnings" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Show Warnings</span>
+                </label>
+            </div>
+
+            <div class="setting-toggle">
+                <label class="toggle-container">
+                    <input type="checkbox" id="auto-block" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Auto-block Suspicious Emails</span>
+                </label>
+            </div>
+
+            <div class="setting-toggle">
+                <label class="toggle-container">
+                    <input type="checkbox" id="enhanced-scanning">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Enhanced Deep Scanning</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="action-section">
+            <button class="scan-button" id="scan-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Scan Current Page
+            </button>
+        </div>
+
+        <!-- Footer info -->
+        <div class="demo-notice">
+            ✅ Popup is now scrollable with custom scrollbars! Production API on port 8001 added.
+        </div>
+    </div>
+
+    <script>
+        // Simple demo script to show interactivity
+        document.getElementById('scan-button').addEventListener('click', function() {
+            this.innerHTML = '<div style="width:16px;height:16px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin 1s linear infinite;"></div> Scanning...';
+            
+            setTimeout(() => {
+                this.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Scan Complete!';
+                
+                setTimeout(() => {
+                    this.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Scan Current Page';
+                }, 2000);
+            }, 2000);
+        });
+    </script>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>
